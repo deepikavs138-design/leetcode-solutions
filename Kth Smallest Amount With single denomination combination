@@ -1,0 +1,59 @@
+class Solution {
+public:
+    long long findKthSmallest(vector<int>& coins, int k) {
+        // Remove redundant coins (if one divides another, keep only smallest)
+        sort(coins.begin(), coins.end());
+        vector<int> filtered;
+        for (int c : coins) {
+            bool useful = true;
+            for (int f : filtered) {
+                if (c % f == 0) { // redundant
+                    useful = false;
+                    break;
+                }
+            }
+            if (useful) filtered.push_back(c);
+        }
+        
+        // Binary search range
+        long long left = 1, right = 1LL * filtered.back() * k, ans = -1;
+        
+        while (left <= right) {
+            long long mid = (left + right) / 2;
+            if (count(filtered, mid) >= k) {
+                ans = mid;
+                right = mid - 1;
+            } else {
+                left = mid + 1;
+            }
+        }
+        return ans;
+    }
+    
+    // Count distinct multiples ≤ x using inclusion-exclusion
+    long long count(vector<int>& coins, long long x) {
+        int n = coins.size();
+        long long res = 0;
+        for (int mask = 1; mask < (1 << n); mask++) {
+            long long lcm = 1;
+            int bits = __builtin_popcount(mask);
+            bool overflow = false;
+            for (int i = 0; i < n; i++) {
+                if (mask & (1 << i)) {
+                    lcm = lcm / gcd(lcm, coins[i]) * coins[i];
+                    if (lcm > x) { overflow = true; break; }
+                }
+            }
+            if (!overflow) {
+                long long cnt = x / lcm;
+                if (bits % 2) res += cnt; // inclusion
+                else res -= cnt;          // exclusion
+            }
+        }
+        return res;
+    }
+    
+    long long gcd(long long a, long long b) {
+        return b == 0 ? a : gcd(b, a % b);
+    }
+};
