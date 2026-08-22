@@ -1,0 +1,18 @@
+class Solution {
+public:
+    bool checkDivisibility(int n) {
+        int sumDigits = 0;
+        int productDigits = 1;
+        int temp = n;
+        
+        while (temp > 0) {
+            int digit = temp % 10;
+            sumDigits += digit;
+            productDigits *= digit;
+            temp /= 10;
+        }
+        
+        int total = sumDigits + productDigits;
+        return (total != 0 && n % total == 0);
+    }
+};
